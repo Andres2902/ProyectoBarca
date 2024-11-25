@@ -97,13 +97,11 @@ bool Lugar::verificarProblemas() {
     }
     // Verificar si el zorro se puede comer al conejo
     if (Zorro != nullptr && Conejo != nullptr) {
-        cout<<"\nEl zorro se comio al conejo\n"<<endl;
         return true;
     }
 
     // Verificar si el conejo se puede comer la lechuga
     if (Conejo != nullptr && Lechuga != nullptr) {
-        cout<<"\nEl conejo se comio la lechuga\n"<<endl;
         return true;
     }
 
