@@ -1,8 +1,21 @@
 #include "Jugador.h"
 #include <iostream>
 #include <string>
-#include <limits>
 #include <algorithm>
+
+// Función auxiliar que maneja la verificación de problemas en una ubicación (orilla o barca)
+auto verificarProblemasEnUbicacion = [](auto* ubicacion, const string& nombreUbicacion) { //recibe una ubicacion y su nombre 
+    if (ubicacion->verificarProblemas() == true) { // si la ubicacion posee algun problema rectifica que problema tiene e imprime el mensaje
+        if (ubicacion->getZorro() != nullptr && ubicacion->getConejo() != nullptr && ubicacion->getLechuga() == nullptr) {
+            cout << "\nEl zorro se comió al conejo en la " << nombreUbicacion << endl;
+        } else if (ubicacion->getConejo() != nullptr && ubicacion->getLechuga() != nullptr && ubicacion->getZorro() == nullptr) {
+            cout << "\nEl conejo se comió la lechuga en la " << nombreUbicacion << endl;
+        } else {
+            cout << "\nEl zorro se comió al conejo y el conejo se comió a la lechuga en la " << nombreUbicacion << endl;
+        }
+    }
+};
+
 
 Jugador::Jugador() {
     juego = new Juego();
@@ -13,17 +26,8 @@ Jugador::~Jugador() {
 }
 
 void Jugador::jugar() {
-    string aux;
-    // Mostrar instrucciones iniciales
-    cout << "\n=== BIENVENIDO AL JUEGO DEL ROBOT, ZORRO, CONEJO Y LECHUGA ===\n";
-    cout << "Comandos disponibles:\n";
-    cout << "B - Mover la barca\n";
-    cout << "R - Mover el robot\n";
-    cout << "Z - Mover el zorro\n";
-    cout << "C - Mover el conejo\n";
-    cout << "L - Mover la lechuga\n";
-    cout << "S - Salir del juego\n\n";
-    cout << "Presione Enter para comenzar...";
+    string tipoObjeto,aux;
+    bool enBarca = false,enIzquierda = false,enDerecha = false,huboProblema = false;
     getline(cin,aux);  
     // Iniciar el juego
     juego->iniciar();
@@ -31,16 +35,16 @@ void Jugador::jugar() {
     while (!juego->estaTerminado()) {
         mostrarEstado();
         // Verificar si hay problemas después del movimiento
-        if (juego->getOrillaIzquierda()->verificarProblemas() || juego->getOrillaDerecha()->verificarProblemas() ||juego->getBarca()->verificarProblemas())
-            {
-            cout<<"\nEl juego ha terminado, has perdido!\n"<<endl;
+        if (juego->getOrillaIzquierda()->verificarProblemas() || juego->getOrillaDerecha()->verificarProblemas() || juego->getBarca()->verificarProblemas()) {
+            // Verificar problemas en la orilla izquierda
+            verificarProblemasEnUbicacion(juego->getOrillaIzquierda(), "orilla izquierda");
+            // Verificar problemas en la barca
+            verificarProblemasEnUbicacion(juego->getBarca(), "barca");
+            // Verificar problemas en la orilla derecha
+            verificarProblemasEnUbicacion(juego->getOrillaDerecha(), "orilla derecha");
+            cout << "\nEl juego ha terminado!\n" <<"PERDISTE"<<endl;
             juego->setJuegoTerminado(true);
             return;
-            }
-            // verifica se ha ganado el juego
-        if(juego->haGanado()==true){
-            cout<<"\nEl juego ha terminado, has ganado!\n"<<endl;
-            juego->setJuegoTerminado(true);
         }
         string comando = leerComando();
         // Verificar si el jugador quiere salir
@@ -48,33 +52,65 @@ void Jugador::jugar() {
             cout << "\nJuego terminado por el jugador\n";
             break;
         }
-        // Ejecutar el comando
-        juego->ejecutarComando(comando);
-        //revisa el robot esta ne la barca para saltar mensaje de error
-        if (comando == "B" || comando == "b"){
-            if (juego->getBarca()->mover()==false){
-                if(!juego->getBarca()->tieneRobot()){
-                    cout<<"No hay un robot en la barca"<<endl;
-                }else if (juego->getBarca()->cantidadIndividuos()>2){
-                    cout<<"La barca solo puede transportar 2 individuos (incluyendo al robot)"<<endl;
-                }
-            }else{
-                juego->getBarca()->mover(); // se vuelve a llamar la funcion para validar su movimiento (de lo contrario permaneceria estatico por que se habria llamado 2 veces en una en la funcion y otra en juego.cpp)
+    // Ejecutar el comando
+    juego->ejecutarComando(comando);
+    // Verificar caídas al agua
+    if (comando == "B" || comando == "b") {
+        if (juego->getBarca()->mover() == false) {
+            if (!juego->getBarca()->tieneRobot()) {
+                cout << "No hay un robot en la barca" << endl;
+            } else if (juego->getBarca()->cantidadIndividuos() > 2) {
+                cout << "La barca solo puede transportar 2 individuos (incluyendo al robot)" << endl;
+            }
+        } else {
+            juego->getBarca()->mover(); // Validar el movimiento de la barca
+        }
+    }   
+    if (comando == "Z" || comando == "z" || comando == "C" || comando == "c" || comando == "L" || comando == "l") { //implementacion cout de caidas al agua
+        // Determinar qué objeto se está verificando
+        if (comando == "Z" || comando == "z") {
+            enBarca = (juego->getBarca()->getZorro() != nullptr);
+            tipoObjeto = "zorro";
+        } else if (comando == "C" || comando == "c") {
+            enBarca = (juego->getBarca()->getConejo() != nullptr);
+            tipoObjeto = "conejo";
+        } else if (comando == "L" || comando == "l") {
+            enBarca = (juego->getBarca()->getLechuga() != nullptr);
+            tipoObjeto = "lechuga";
+        }
+        if (!enBarca) { // Si el objeto no está en la barca, verifica las orillas
+            if (comando == "Z" || comando == "z") {
+                enIzquierda = (juego->getOrillaIzquierda()->getZorro() != nullptr);
+                enDerecha = (juego->getOrillaDerecha()->getZorro() != nullptr);
+            } else if (comando == "C" || comando == "c") {
+                enIzquierda = (juego->getOrillaIzquierda()->getConejo() != nullptr);
+                enDerecha = (juego->getOrillaDerecha()->getConejo() != nullptr);
+            } else if (comando == "L" || comando == "l") {
+                enIzquierda = (juego->getOrillaIzquierda()->getLechuga() != nullptr);
+                enDerecha = (juego->getOrillaDerecha()->getLechuga() != nullptr);
+            }
+            // Verificación de caídas al agua
+            if (enIzquierda && !juego->getBarca()->estaEnOrillaIzquierda()) {
+                cout << "\nEl " << tipoObjeto << " ha caído al agua!"<<"\nPERDISTE" << endl;
+                huboProblema = true;
+            } else if (enDerecha && juego->getBarca()->estaEnOrillaIzquierda()) {
+                cout << "\nEl " << tipoObjeto << " ha caído al agua!"<<"\nPERDISTE" << endl;
+                huboProblema = true;
             }
         }
-
-        
-        // IMPLEMENTAR SALTOS AL AGUA SALIDAS COUT
-
-        
-        
     }
+    // FINAL IMPLEMENTACION CAIDAS AL AGUA
     // Mostrar resultado final
-    mostrarEstado();
-    if (juego->haGanado()) {
-        cout << "\n¡GANASTE!\n";
-        cout << "Has logrado transportar a todos los individuos de manera segura.\n";
+    if (!huboProblema) { // Evitar impresión extra al terminar el juego
+        mostrarEstado();
     }
+    // verifica se ha ganado el juego
+    if (juego->haGanado()) {
+        cout << "\nGANASTE\n";
+        cout << "Has logrado transportar a todos los individuos de manera segura.\n";
+        juego->setJuegoTerminado(true);
+        return;
+    }}
 }
 
 string Jugador::leerComando() {
