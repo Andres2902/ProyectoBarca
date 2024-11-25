@@ -5,6 +5,7 @@
 #include "Lechuga.h"
 #include <stdexcept>
 
+
 Juego::Juego() {
     // Inicializar punteros
     Barca = new class Barca();
@@ -34,7 +35,6 @@ void Juego::iniciar() {
 }
 
 void Juego::ejecutarComando(string comando) {
-
     if (juegoTerminado) return;
     if (comando == "B") {  // Mover barca
         if (Barca->mover()) {
@@ -45,11 +45,8 @@ void Juego::ejecutarComando(string comando) {
         Individuo* individuoAMoverBarca = nullptr; // individuo en la barca
         Individuo* individuoAMoverOI = nullptr; // individuo en la orilla izquierda
         Individuo* individuoAMoverOD = nullptr; // individuo en la orilla derecha
-
-// -------------------------------------------------- MOVIMIENTOS -----------------------------------------------------------------------------------------
-        
+// -------------------------------------------------- MOVIMIENTOS ------------------------------------------------------------------
         if (comando == "R") {
-
             individuoAMoverOI = orillaIzquierda->getRobot();
             individuoAMoverBarca = Barca->getRobot();
             individuoAMoverOD = orillaDerecha->getRobot();
@@ -89,7 +86,6 @@ void Juego::ejecutarComando(string comando) {
             individuoAMoverOD = orillaDerecha->getZorro();
             if(individuoAMoverBarca == nullptr){ // si el zorro no esta en la barca
                 if(individuoAMoverOI == nullptr){ // si el zorro no esta en la orilla izquierda, es decir el zorro esta en la orilla derecha
-
                     if(Barca->estaEnOrillaIzquierda() == true){ //la barca esta en la orilla izquierda, es decir el zorro va a saltar al agua
                         juegoTerminado = true;
                         return;
@@ -99,9 +95,7 @@ void Juego::ejecutarComando(string comando) {
                         orillaDerecha->setZorro(nullptr);
                     }                 
                 }
-
                 if(individuoAMoverOD == nullptr){ // si el zorro no esta en la orilla derecha, es decir el zorro esta en la orilla izquierda
-
                     if(Barca->estaEnOrillaIzquierda() == true){ //la barca esta en la orilla izquierda, es decir saltara a la barca
                         Barca->setZorro(orillaIzquierda->getZorro());
                         orillaIzquierda->setZorro(nullptr);
@@ -109,11 +103,8 @@ void Juego::ejecutarComando(string comando) {
                         juegoTerminado = true;
                         return;
                     }
-
                 }
-
             } else{ // el zorro esta en la barca
-
                 if(Barca->estaEnOrillaIzquierda()== true){ // si esta en la orilla izquierda pasa el zorro de la barca a la orilla
                     orillaIzquierda->setZorro(Barca->getZorro());
                     Barca->setZorro(nullptr);
@@ -123,9 +114,7 @@ void Juego::ejecutarComando(string comando) {
                 }
             }
         }
-
         else if(comando == "C"){
-
                 individuoAMoverOI = orillaIzquierda->getConejo();
                 individuoAMoverBarca = Barca->getConejo();
                 individuoAMoverOD = orillaDerecha->getConejo();
@@ -159,7 +148,6 @@ void Juego::ejecutarComando(string comando) {
                     }
                 }
         }
-
         else if(comando == "L"){
             individuoAMoverOI = orillaIzquierda->getLechuga();
             individuoAMoverBarca = Barca->getLechuga();
