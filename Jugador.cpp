@@ -27,7 +27,7 @@ Jugador::~Jugador() {
 
 void Jugador::jugar() {
     string tipoObjeto,aux;
-    bool enBarca = false,enIzquierda = false,enDerecha = false,huboProblema = false;
+    bool enBarca = false,enIzquierda = false,enDerecha = false;
     getline(cin,aux);  
     // Iniciar el juego
     juego->iniciar();
@@ -92,20 +92,17 @@ void Jugador::jugar() {
             // Verificación de caídas al agua
             if (enIzquierda && !juego->getBarca()->estaEnOrillaIzquierda()) {
                 cout << "\nEl " << tipoObjeto << " ha caído al agua!"<<"\nPERDISTE" << endl;
-                huboProblema = true;
             } else if (enDerecha && juego->getBarca()->estaEnOrillaIzquierda()) {
                 cout << "\nEl " << tipoObjeto << " ha caído al agua!"<<"\nPERDISTE" << endl;
-                huboProblema = true;
             }
         }
     }
     // FINAL IMPLEMENTACION CAIDAS AL AGUA
+        
     // Mostrar resultado final
-    if (!huboProblema) { // Evitar impresión extra al terminar el juego
-        mostrarEstado();
-    }
     // verifica se ha ganado el juego
     if (juego->haGanado()) {
+        mostrarEstado();
         cout << "\nGANASTE\n";
         cout << "Has logrado transportar a todos los individuos de manera segura.\n";
         juego->setJuegoTerminado(true);
